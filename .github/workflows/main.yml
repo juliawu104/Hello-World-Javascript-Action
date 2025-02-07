@@ -1,15 +1,39 @@
-on: [push]
+name: Deploy to GitHub Pages 🚀
+
+on:
+  push:
+    branches:
+      - main  # 這裡表示當 main 分支有新的 push 時，會觸發部署
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  hello_world_job:
+  deploy:
     runs-on: ubuntu-latest
-    name: A job to say hello
+
     steps:
-      - name: Hello world action step
-        id: hello
-        uses: juliawu104/hello-world-javascript-action@v1.2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          who-to-greet: 'Mona the Octocat'
-      # Use the output from the `hello` step
-      - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
+          node-version: 18  # 適用於你的專案
+
+      - name: Install Dependencies
+        run: npm install  # 如果你使用 Yarn，請改成 `yarn install`
+
+      - name: Build Project
+        run: npm run build  # 這一步會產生 `dist/` 或 `build/` 資料夾
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build  # 這裡的 `build` 資料夾請根據你的專案修改，例如 `dist`。
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
